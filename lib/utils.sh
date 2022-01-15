@@ -233,16 +233,30 @@ pushover () {
 
 ## @fn _omb_util_get_shopt optnames...
 if ((_omb_bash_version >= 40100)); then
-  _omb_util_get_shopt() { shopt=$BASHOPTS; }
+  _omb_util_get_shopt() {
+    if [[ $1 == -v ]]; then
+      [[ $2 == shopt ]] || local shopt
+      _omb_util_get_shopt "${@:3}"
+      [[ $2 == shopt ]] || printf -v "$2" '%s' "$shopt"
+    else
+      shopt=$BASHOPTS
+    fi
+  }
 else
   _omb_util_get_shopt() {
-    shopt=
-    local opt
-    for opt; do
-      if shopt -q "$opt" &>/dev/null; then
-        shopt=${shopt:+$shopt:}$opt
-      fi
-    done
+    if [[ $1 == -v ]]; then
+      [[ $2 == shopt ]] || local shopt
+      _omb_util_get_shopt "${@:3}"
+      [[ $2 == shopt ]] || printf -v "$2" '%s' "$shopt"
+    else
+      shopt=
+      local opt
+      for opt; do
+        if shopt -q "$opt" &>/dev/null; then
+          shopt=${shopt:+$shopt:}$opt
+        fi
+      done
+    fi
   }
 fi
 
@@ -294,4 +308,42 @@ _omb_util_glob_expand() {
   [[ :$shopt: != *:nullglob:* ]] && shopt -u nullglob
   [[ :$shopt: == *:failglob:* ]] && shopt -s failglob
   return 0
+}
+
+## @fn _omb_util_split_lines array_name string
+_omb_util_split_lines() {
+  local set=$- IFS=$'\n'
+  set -f
+  eval "$1=($2)"
+  [[ $set == *f* ]] || set +f
+  return 0
+}
+
+## @fn _omb_util_array_remove array_name value
+_omb_util_array_contains() {
+  [[ $1 == ret ]] ||
+    eval "local -a ret=(\"\${$2[@]}\")"
+  local value
+  for value in "${ret[@]}"; do
+    if [[ $value == "$2" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+## @fn _omb_util_array_remove array_name values...
+function _omb_util_array_remove {
+  local __script='
+    local iA yA
+    for iA in ${!A[@]}; do
+      for yA in "${@:2}"; do
+        if [[ ${A[iA]} == "$yA" ]]; then
+          unset -v '\''A[iA]'\''
+          continue 2
+        fi
+      done
+    done
+    A=("${A[@]}") # compaction
+  '; eval -- "${__script//A/$1}"
 }
