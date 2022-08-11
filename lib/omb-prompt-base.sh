@@ -113,6 +113,8 @@ function scm {
 }
 
 function scm_prompt_char {
+	[ -z ${SCM+x} ] &&
+		SCM=''
   if [[ -z $SCM ]]; then scm; fi
   if [[ $SCM == $SCM_GIT ]]; then SCM_CHAR=$SCM_GIT_CHAR
   elif [[ $SCM == $SCM_HG ]]; then SCM_CHAR=$SCM_HG_CHAR
