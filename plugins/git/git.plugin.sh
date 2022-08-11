@@ -83,6 +83,7 @@ alias gcs='git commit -S'
 
 alias gd='git diff'
 alias gdca='git diff --cached'
+alias gds='git diff --staged'
 alias gdct='git describe --tags `git rev-list --tags --max-count=1`'
 alias gdt='git diff-tree --no-commit-id --name-only -r'
 alias gdw='git diff --word-diff'
