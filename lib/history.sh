@@ -34,7 +34,7 @@ export HISTSIZE=
 export HISTFILESIZE=
 
 # Avoid duplicate entries
-HISTCONTROL="erasedups:ignoreboth"
+# HISTCONTROL="erasedups:ignoreboth"
 
 # Don't record some commands
 export HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear"
